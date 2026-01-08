@@ -1,102 +1,67 @@
-# 🏥 Discharge AI Agent (Gemini)
+# Discharge AI Agent
 
-Full-stack web app that simplifies hospital discharge notes into clear, patient-friendly instructions using Google Gemini.
+A full-stack application that acts as a medical assistant. It helps simplify hospital discharge notes and answers patient questions using Google Gemini AI.
 
-## Overview
-- Frontend: React + Vite + Tailwind (UI unchanged)
-- Backend: Node.js + Express
-- LLM Provider: Google Gemini (no OpenAI dependencies)
-- API-first: frontend calls backend `/api/simplify-discharge`
+## Features
 
-## Architecture
-```
-┌─────────────┐
-│   Frontend  │ (React, Port 3000)
-└──────┬──────┘
-       │ POST /api/simplify-discharge
-┌──────▼──────┐
-│   Backend   │ (Express, Port 5000)
-└──────┬──────┘
-       │ Google Gemini API
-┌──────▼──────┐
-│   Gemini    │ (Cloud)
-└─────────────┘
-```
+- **Persistent Chat Interface**: Intelligent conversation about your health documents.
+- **File Upload Support**: Upload **Images (PNG, JPEG)** or **PDFs**.
+- **Automated Text Extraction**: Integrated OCR and PDF parsing to "read" your documents.
+- **Medical Simplification**: Converts complex medical jargon into easy-to-understand language.
 
-## Project Structure
-```
-discharge-ai-agent/
-├── backend/
-│   ├── controllers/dischargeController.js
-│   ├── services/geminiClient.js
-│   ├── server.js
-│   ├── package.json
-│   └── env.example
-├── frontend/
-│   └── src/...
-└── README.md
-```
+## Tech Stack
 
-## Prerequisites
-- Node.js 18+
-- Google AI Studio API key with access to Gemini models
+- **Frontend**: React, Vite, Tailwind CSS, Lucide Icons
+- **Backend**: Node.js, Express, Multer
+- **AI**: Google Gemini API
+- **Processing**: Tesseract.js (OCR), pdf-parse
 
 ## Setup
-1) Backend
-```bash
-cd backend
-cp env.example .env  # fill GEMINI_API_KEY, optional GEMINI_MODEL, PORT
-npm install
-```
 
-2) Frontend
-```bash
-cd frontend
-npm install
-```
+1.  **Clone the repository**.
+2.  **Install Dependencies**:
 
-## Running
-In two terminals:
-```bash
-cd backend && npm start
-cd frontend && npm run dev
-```
-- Backend: http://localhost:5000
-- Frontend: http://localhost:3000
+    ```bash
+    # Backend
+    cd backend
+    npm install
 
-## Configuration
-`backend/.env` (from `env.example`)
-```
-GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-1.5-pro
-PORT=5000
-```
-Frontend can override API base with `VITE_API_URL` (defaults to backend localhost:5000).
+    # Frontend
+    cd ../frontend
+    npm install
+    ```
 
-## API
-- `POST /api/simplify-discharge`
-  - Body: `{ "dischargeNotes": "text" }`
-  - Response: `{ success: true, data: { summary, carePlan[], medications[], warningSigns[], followUpReminders[] }, timestamp }`
-- `GET /api/health` – health check
+3.  **Environment Variables**:
+    Create a `.env` file in the `backend/` directory:
 
-## Sample Output (shortened)
-The backend returns structured JSON such as:
-```json
-{
-  "success": true,
-  "data": {
-    "summary": "You were treated for a severe asthma attack with pneumonia...",
-    "carePlan": [{ "day": 1, "instructions": "..." }],
-    "medications": [{ "name": "Tab Azithromycin 500mg", "dosage": "500mg", "frequency": "Once daily after meals", "duration": "5 days" }],
-    "warningSigns": ["Increasing breathlessness", "High fever"],
-    "followUpReminders": [{ "date": "After 7 days", "action": "Visit your doctor" }]
-  }
-}
-```
+    ```env
+    PORT=5000
+    GEMINI_API_KEY=your_gemini_api_key_here
+    GEMINI_MODEL=gemini-1.5-pro
+    ```
 
-## Healthcare Safety
-This tool is for education only and not medical advice. Always follow your clinician’s guidance and seek emergency care when needed. No patient data is stored by the app.
+4.  **Run the Application**:
 
-## License
-MIT
+    Start the Backend:
+    ```bash
+    cd backend
+    npm start
+    ```
 
+    Start the Frontend:
+    ```bash
+    cd frontend
+    npm run dev
+    ```
+
+## Usage
+
+1.  Open the frontend (usually `http://localhost:5173`).
+2.  You will see a Chat Interface.
+3.  **To Simplify a Note**: Click the "paperclip" icon to upload a photo of your discharge summary or a PDF.
+4.  **To Chat**: Type your questions in the text box. The AI will use the context of the uploaded file to answer you.
+
+## Troubleshooting
+
+-   **Upload Errors**: Ensure files are under 5MB. Supported formats: Images, PDF.
+-   **Server Crash**: Check that `GEMINI_API_KEY` is set correctly.

@@ -4,61 +4,11 @@
  * This is the main React component that handles the entire application flow.
  */
 
-import React, { useState } from 'react';
-import DischargeForm from './components/DischargeForm';
-import SimplifiedView from './components/SimplifiedView';
+import React from 'react';
+import ChatInterface from './components/ChatInterface';
 import './App.css';
 
 function App() {
-  // State to store the simplified discharge data
-  const [simplifiedData, setSimplifiedData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  /**
-   * Handle form submission
-   * Receives discharge notes and triggers API call
-   */
-  const handleSubmit = async (dischargeNotes) => {
-    setLoading(true);
-    setError(null);
-    setSimplifiedData(null);
-
-    try {
-      // API endpoint - adjust URL if backend is on different port
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      
-      const response = await fetch(`${API_URL}/api/simplify-discharge`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ dischargeNotes }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to process discharge notes');
-      }
-
-      setSimplifiedData(data.data);
-    } catch (err) {
-      setError(err.message || 'An error occurred. Please try again.');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Reset form to allow new submission
-   */
-  const handleReset = () => {
-    setSimplifiedData(null);
-    setError(null);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Header */}
@@ -82,7 +32,7 @@ function App() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>Important:</strong> This tool is for educational purposes only and is not a replacement for professional medical advice. 
+                <strong>Important:</strong> This tool is for educational purposes only and is not a replacement for professional medical advice.
                 Always consult your doctor for medical decisions. No patient data is stored.
               </p>
             </div>
@@ -92,17 +42,17 @@ function App() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-6xl">
-        {!simplifiedData ? (
-          <DischargeForm onSubmit={handleSubmit} loading={loading} error={error} />
-        ) : (
-          <SimplifiedView data={simplifiedData} onReset={handleReset} />
-        )}
+        <div className="mb-8 text-center text-gray-600 max-w-2xl mx-auto">
+          Start by asking a question or uploading your discharge summary/notes (Image or PDF).
+        </div>
+
+        <ChatInterface />
       </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-6">
         <div className="container mx-auto px-4 text-center text-gray-600 text-sm">
-          <p>Discharge AI Agent © 2024 | Built for better healthcare understanding</p>
+          <p>Discharge AI Agent © 2026 | Built for better healthcare understanding</p>
         </div>
       </footer>
     </div>
