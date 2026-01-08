@@ -10,8 +10,7 @@ export default function ChatInterface() {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [attachedFile, setAttachedFile] = useState(null); // { name, type, context }
+    const [attachedFile, setAttachedFile] = useState(null); // { name, type, file }
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
 
@@ -22,7 +21,7 @@ export default function ChatInterface() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const handleFileSelect = async (e) => {
+    const handleFileSelect = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -32,110 +31,90 @@ export default function ChatInterface() {
             return;
         }
 
-        setIsUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch(`${API_URL}/api/upload`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Upload failed');
-            }
-
-            setAttachedFile({
-                name: data.fileName,
-                type: file.type.startsWith('image/') ? 'image' : 'pdf',
-                context: data.extractedText
-            });
-
-            // Add a system notification about the file
-            setMessages(prev => [...prev, {
-                role: 'system',
-                content: `Attached: ${data.fileName} (Text processed)`
-            }]);
-
-        } catch (error) {
-            console.error('Upload error:', error);
-            alert('Failed to upload file: ' + error.message);
-        } finally {
-            setIsUploading(false);
-            // Reset input so same file can be selected again if needed (though infrequent)
-            e.target.value = null;
+        // Validate file type
+        const isImage = file.type.startsWith('image/');
+        const isPdf = file.type === 'application/pdf';
+        
+        if (!isImage && !isPdf) {
+            alert('Invalid file type. Only images (PNG, JPEG) and PDFs are supported.');
+            return;
         }
+
+        // Store file for sending with message
+        setAttachedFile({
+            name: file.name,
+            type: isImage ? 'image' : 'pdf',
+            file: file
+        });
+
+        // Reset input so same file can be selected again if needed
+        e.target.value = null;
     };
 
     const sendMessage = async () => {
-        if ((!input.trim() && !attachedFile) || isLoading) return;
+        const messageText = input.trim();
+        if (!messageText && !attachedFile) return;
+        if (isLoading) return;
 
-        const userMessage = { role: 'user', content: input };
+        // Save input value before clearing
+        const currentInput = messageText;
+        const currentFile = attachedFile;
+
+        // Show user message in UI
+        const userMessageText = currentInput || (currentFile ? `📎 ${currentFile.name}` : '');
+        const userMessage = { role: 'user', content: userMessageText };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
 
         try {
-            // Prepare history for API (exclude system messages)
+            // Prepare history for API (exclude system messages and current message)
             const history = messages
                 .filter(m => m.role !== 'system')
                 .map(m => ({ role: m.role, content: m.content }));
 
-            const payload = {
-                prompt: input || "Please analyze the attached document.",
-                history: history,
-                // If there's an attached file, include its extracted text as context
-                // If it was already sent in a previous turn, we might rely on history, 
-                // but our backend logic adds it to the current prompt if provided.
-                // Simple strategy: Send 'context' only if it's currently attached newly 
-                // OR we might want to keep it persistent. 
-                // For now, let's assume we send it with the request that accompanies the upload "session".
-                context: attachedFile ? attachedFile.context : '' // TODO: Handle multi-file context persistence?
-            };
+            // Use FormData to send file + message together
+            const formData = new FormData();
+            
+            // Add file if attached
+            if (currentFile && currentFile.file) {
+                formData.append('file', currentFile.file);
+            }
+            
+            // Add message/prompt
+            if (currentInput) {
+                formData.append('message', currentInput);
+            } else if (currentFile) {
+                // Default prompt if no message provided
+                formData.append('message', 'Please analyze this medical document and explain it in simple, patient-friendly terms.');
+            }
+            
+            // Add history as JSON string
+            formData.append('history', JSON.stringify(history));
 
-            const response = await fetch(`${API_URL}/api/chat`, {
+            // Send to unified query endpoint
+            const response = await fetch(`${API_URL}/api/query`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                // Do NOT set Content-Type header - browser will set it with boundary for FormData
+                body: formData
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to get response');
+                throw new Error(data.error || data.details || 'Failed to get response');
             }
 
+            // Add assistant response
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 content: data.content
             }]);
 
-            // Clear attached file after successfully "using" it in a prompt?
-            // Or keep it attached until user removes it?
-            // UX Decision: Clear it so next message doesn't re-inject context unless user wants.
-            // But usually context should persist.
-            // Let's Keep it in state but maybe visually indicate it's "part of the conversation" now.
-            // Actually, if we clear it, we rely on the implementation of 'history' in backend to remember it?
-            // Our backend doesn't store session state. It receives history on every request.
-            // So if I clear 'context' here, and the *backend* only sees 'history', 
-            // the 'context' (extracted text) will be lost from the prompt construction unless it was added to 'history'.
-            // My backend implementation adds context to the prompt string. It does NOT push it to history array explicitly as a message.
-            // So... if I want context to persist, I should probably inject it into the message history myself or keep sending it.
-            // Let's inject it into the USER message content for history purposes? 
-            // OR better: When we get a response, we assume the AI "knows" it now.
-            // If the backend isn't stateful, we must send the context every time OR send the *full conversation including the context*.
-            // Let's stick to: sending context with THIS message. 
-            // Ideally, the backend should put the context into the history logic.
-            // Let's modify the flow: If attachedFile, we append "[Attached File Content...]" to the user's message in the history we maintain?
-            // No, that makes the UI messy.
-
-            // Let's simply NOT clear attachedFile for now, so it keeps sending context. 
-            // User can click 'remove' to stop sending it.
-            // Alternatively, I can append the extracted text to the `history` prompt I send next time.
-            // Let's just keep simple: Attached file stays attached until User removes it.
+            // Clear attached file after successful send (only if we had one)
+            if (currentFile) {
+                setAttachedFile(null);
+            }
 
         } catch (error) {
             console.error('Chat error:', error);
@@ -210,12 +189,11 @@ export default function ChatInterface() {
                     {/* File Button */}
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading || isLoading}
-                        className={`p-3 rounded-full transition-colors ${isUploading ? 'bg-gray-100' : 'hover:bg-gray-100 text-gray-500'
-                            }`}
-                        title="Attach file"
+                        disabled={isLoading}
+                        className="p-3 rounded-full transition-colors hover:bg-gray-100 text-gray-500"
+                        title="Attach file (Image or PDF)"
                     >
-                        {isUploading ? <Loader2 size={20} className="animate-spin text-blue-500" /> : <Paperclip size={20} />}
+                        <Paperclip size={20} />
                     </button>
                     <input
                         type="file"
