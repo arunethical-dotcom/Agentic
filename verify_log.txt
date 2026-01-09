@@ -1,0 +1,44 @@
+﻿≡ƒº¬ Starting Real-World Action Agent Verification...
+
+≡ƒö╣ [1] Generating Schedule from Care Plan...
+[SchedulePlanner] Generating schedule from care plan...
+[SchedulePlanner] Generated 7 schedule items
+Γ£à Schedule Created: 7 items
+
+≡ƒö╣ [2] Verifying Output Formats...
+  --- Screen Reader Output Mockup ---
+  Your recovery schedule starting Fri, Jan 9. You have 7 items to track. 
+
+Item 1: Take Metformin. Details: 500mg - Take with food. This repeats daily. ...
+Γ£à Formats Verified: Timeline, Checklist, ScreenReader generated.
+
+≡ƒö╣ [3] Creating Reminders...
+[ReminderEngine] Creating reminders for schedule 9e2bb441-ab63-4044-9b18-abe3921301a9...
+[ReminderEngine] Created 67 reminders
+Γ£à Reminders Created: 67
+   Upcoming (Next 48h): 23
+
+≡ƒö╣ [4] Simulating Adherence & Escalation...
+   Simulating 3 missed doses...
+[ReminderEngine] Reminder 5b3f33ce-77b9-45fe-8279-b139a9f5696b marked as missed
+[AdherenceTracker] Recorded missed for test-patient-001
+[ReminderEngine] Reminder bc5490b2-49d2-4740-94b2-83190b12a21b marked as missed
+[AdherenceTracker] Recorded missed for test-patient-001
+[ReminderEngine] Reminder 9b1f7b4a-df0f-406c-9875-5025daf1136b marked as missed
+[AdherenceTracker] Recorded missed for test-patient-001
+
+≡ƒö╣ [5] Checking Compliance Analysis...
+[ComplianceAnalyzer] Analyzing compliance for test-patient-001...
+   Risk Level: CRITICAL
+   Factors: Very low medication adherence (<50%), No current adherence streak
+[EscalationManager] Evaluating escalation for test-patient-001...
+[ComplianceAnalyzer] Analyzing compliance for test-patient-001...
+Γ£à Escalation Triggered Successfully!
+   Urgency: high
+   Rules: criticalNonCompliance, multipleConsecutiveMisses
+[EscalationManager] Created high escalation for test-patient-001
+≡ƒÜ¿ [ESCALATION NOTIFICATION] Urgency: high
+   User: test-patient-001
+   Rules: criticalNonCompliance, multipleConsecutiveMisses
+
+Γ£à VERIFICATION COMPLETE.

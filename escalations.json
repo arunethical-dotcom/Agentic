@@ -1,0 +1,98 @@
+[
+  {
+    "id": "escalation-1767969318595",
+    "userId": "test-patient-001",
+    "triggeredRules": [
+      {
+        "rule": "criticalNonCompliance",
+        "urgency": "high",
+        "action": "Contact healthcare provider",
+        "message": "Patient showing very low medication adherence (<50%)"
+      },
+      {
+        "rule": "multipleConsecutiveMisses",
+        "urgency": "high",
+        "action": "Immediate follow-up required",
+        "message": "Patient has missed 3+ consecutive critical medications"
+      }
+    ],
+    "urgency": "high",
+    "status": "pending",
+    "context": {},
+    "createdAt": "2026-01-09T14:35:18.595Z",
+    "resolvedAt": null,
+    "resolution": null
+  },
+  {
+    "id": "escalation-1767969380421",
+    "userId": "test-patient-001",
+    "triggeredRules": [
+      {
+        "rule": "criticalNonCompliance",
+        "urgency": "high",
+        "action": "Contact healthcare provider",
+        "message": "Patient showing very low medication adherence (<50%)"
+      },
+      {
+        "rule": "multipleConsecutiveMisses",
+        "urgency": "high",
+        "action": "Immediate follow-up required",
+        "message": "Patient has missed 3+ consecutive critical medications"
+      }
+    ],
+    "urgency": "high",
+    "status": "pending",
+    "context": {},
+    "createdAt": "2026-01-09T14:36:20.421Z",
+    "resolvedAt": null,
+    "resolution": null
+  },
+  {
+    "id": "escalation-1767969425865",
+    "userId": "test-patient-001",
+    "triggeredRules": [
+      {
+        "rule": "criticalNonCompliance",
+        "urgency": "high",
+        "action": "Contact healthcare provider",
+        "message": "Patient showing very low medication adherence (<50%)"
+      },
+      {
+        "rule": "multipleConsecutiveMisses",
+        "urgency": "high",
+        "action": "Immediate follow-up required",
+        "message": "Patient has missed 3+ consecutive critical medications"
+      }
+    ],
+    "urgency": "high",
+    "status": "pending",
+    "context": {},
+    "createdAt": "2026-01-09T14:37:05.865Z",
+    "resolvedAt": null,
+    "resolution": null
+  },
+  {
+    "id": "escalation-1767969447026",
+    "userId": "test-patient-001",
+    "triggeredRules": [
+      {
+        "rule": "criticalNonCompliance",
+        "urgency": "high",
+        "action": "Contact healthcare provider",
+        "message": "Patient showing very low medication adherence (<50%)"
+      },
+      {
+        "rule": "multipleConsecutiveMisses",
+        "urgency": "high",
+        "action": "Immediate follow-up required",
+        "message": "Patient has missed 3+ consecutive critical medications"
+      }
+    ],
+    "urgency": "high",
+    "status": "pending",
+    "context": {},
+    "createdAt": "2026-01-09T14:37:27.026Z",
+    "resolvedAt": null,
+    "resolution": null
+  }
+]
