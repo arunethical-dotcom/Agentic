@@ -34,7 +34,7 @@ export default function ChatInterface() {
         // Validate file type
         const isImage = file.type.startsWith('image/');
         const isPdf = file.type === 'application/pdf';
-        
+
         if (!isImage && !isPdf) {
             alert('Invalid file type. Only images (PNG, JPEG) and PDFs are supported.');
             return;
@@ -64,7 +64,10 @@ export default function ChatInterface() {
         const userMessageText = currentInput || (currentFile ? `📎 ${currentFile.name}` : '');
         const userMessage = { role: 'user', content: userMessageText };
         setMessages(prev => [...prev, userMessage]);
+
+        // Clear inputs immediately so user knows it's being sent
         setInput('');
+        setAttachedFile(null);
         setIsLoading(true);
 
         try {
@@ -75,12 +78,12 @@ export default function ChatInterface() {
 
             // Use FormData to send file + message together
             const formData = new FormData();
-            
+
             // Add file if attached
             if (currentFile && currentFile.file) {
                 formData.append('file', currentFile.file);
             }
-            
+
             // Add message/prompt
             if (currentInput) {
                 formData.append('message', currentInput);
@@ -88,7 +91,7 @@ export default function ChatInterface() {
                 // Default prompt if no message provided
                 formData.append('message', 'Please analyze this medical document and explain it in simple, patient-friendly terms.');
             }
-            
+
             // Add history as JSON string
             formData.append('history', JSON.stringify(history));
 
@@ -99,10 +102,24 @@ export default function ChatInterface() {
                 body: formData
             });
 
+            // Check if response is OK before trying to parse JSON
+            if (!response.ok) {
+                let errorMessage = `Server error: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    // Use the most detailed message available
+                    errorMessage = errorData.details || errorData.error || errorData.fullError || response.statusText;
+                } catch (e) {
+                    // If JSON parsing fails, use the status text
+                    errorMessage = response.statusText || 'Unknown server error';
+                }
+                throw new Error(errorMessage);
+            }
+
             const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.error || data.details || 'Failed to get response');
+            if (!data.content) {
+                throw new Error('Invalid response from server: missing content');
             }
 
             // Add assistant response
@@ -111,16 +128,14 @@ export default function ChatInterface() {
                 content: data.content
             }]);
 
-            // Clear attached file after successful send (only if we had one)
-            if (currentFile) {
-                setAttachedFile(null);
-            }
 
         } catch (error) {
-            console.error('Chat error:', error);
+            console.error('Chat error details:', error);
+            const errorMessage = error.message || 'An unknown error occurred';
+
             setMessages(prev => [...prev, {
-                role: 'system',
-                content: 'Error: ' + error.message,
+                role: 'assistant',
+                content: `🚨 **AI Pipeline Error**\n\n${errorMessage}\n\n*Technical Details: The system attempted to recover using multiple models, but all attempts failed. Please check your network or API status.*`,
                 isError: true
             }]);
         } finally {
@@ -154,10 +169,10 @@ export default function ChatInterface() {
 
                             {/* Bubble */}
                             <div className={`p-3 rounded-2xl shadow-sm whitespace-pre-wrap ${msg.role === 'user'
-                                    ? 'bg-blue-600 text-white rounded-tr-none'
-                                    : (msg.role === 'system'
-                                        ? 'bg-gray-200 text-gray-600 text-sm italic py-1 px-3'
-                                        : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none')
+                                ? 'bg-blue-600 text-white rounded-tr-none'
+                                : (msg.role === 'system'
+                                    ? 'bg-gray-200 text-gray-600 text-sm italic py-1 px-3'
+                                    : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none')
                                 } ${msg.isError ? 'bg-red-100 text-red-600 border-red-200' : ''}`}>
                                 {msg.content}
                             </div>
@@ -219,8 +234,8 @@ export default function ChatInterface() {
                         onClick={sendMessage}
                         disabled={(!input.trim() && !attachedFile) || isLoading}
                         className={`p-3 rounded-full transition-colors flex-shrink-0 ${(!input.trim() && !attachedFile) || isLoading
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
                             }`}
                     >
                         {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
