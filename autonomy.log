@@ -1,0 +1,19 @@
+--- NEW RUN ---
+[INFO] 🚀 Starting Autonomy Verification...
+[INFO] 
+
+--- Test 1: Memory Policy & Retrieval ---
+[INFO] 🤖 [Autonomy Agent] Starting goal: "I am moving to Paris next month. Save this important info. Then tell me what you know about my location plans."
+[INFO] 
+🔄 [Iteration 1]
+[INFO] 🧠 [Planning] Generating plan...
+[INFO] [MOCK LLM] Prompt: GOAL: I am moving to Paris next month. Save this i...
+[INFO] [MOCK] Returning Plan
+[INFO] ▶️ [Executor] Running save_memory("I am moving to Paris next month.")
+[INFO] 💾 [Tool: save_memory] Saving: "I am moving to Paris next month."
+[ERROR] ❌ [Memory] Add failed: fetch failed
+[INFO] ▶️ [Executor] Running search_memory("location plans")
+[INFO] 🔍 [Tool: search_memory] Query: "location plans"
+[ERROR] ❌ [Memory] Search failed: fetch failed
+[INFO] 🤔 [Reflection] Validating final answer...
+[INFO] [MOCK LLM] Prompt: GOAL: I am moving to Paris next month. Save this i...

@@ -1,0 +1,4 @@
+[
+  "ALWAYS verify file paths before deletion.",
+  "If a tool fails, try an alternative immediately."
+]
