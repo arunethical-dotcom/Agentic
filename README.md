@@ -1,67 +1,72 @@
-# Discharge AI Agent
+# Discharge AI Agent (Local-Only)
 
-A full-stack application that acts as a medical assistant. It helps simplify hospital discharge notes and answers patient questions using Google Gemini AI.
+A privacy-focused autonomous medical discharge AI agent that runs entirely on your local machine using Ollama. This system simplifies complex hospital discharge notes, identifies medical red flags, and answers patient questions with zero cloud dependencies.
 
-## Features
+## 🌟 Key Features
 
-- **Persistent Chat Interface**: Intelligent conversation about your health documents.
-- **File Upload Support**: Upload **Images (PNG, JPEG)** or **PDFs**.
-- **Automated Text Extraction**: Integrated OCR and PDF parsing to "read" your documents.
-- **Medical Simplification**: Converts complex medical jargon into easy-to-understand language.
+- **Local-Only LLM**: Powered by Ollama (Default: Mistral) for maximum privacy and data security.
+- **Autonomous Agent**: Custom Think-Plan-Act loop for complex medical reasoning.
+- **Multimodal Support**: Processes **Images (OCR)** and **PDFs** locally.
+- **RAG System**: Local vector search for accurate medical context and citations.
+- **Safety First**: Integrated Red-Flag detection and readability scoring (Grade 6-8 target).
 
-## Tech Stack
+## 🏗️ Tech Stack
 
-- **Frontend**: React, Vite, Tailwind CSS, Lucide Icons
-- **Backend**: Node.js, Express, Multer
-- **AI**: Google Gemini API
-- **Processing**: Tesseract.js (OCR), pdf-parse
+- **Frontend**: React (Vite), CSS3, Feather Icons
+- **Backend**: Node.js (Express), Multer (file handling)
+- **AI Engine**: **Ollama**
+- **Models**: Mistral (Default), Med-Llama (Optional)
+- **Vector Search**: Local JSON Vector Store (RAG)
 
-## Setup
+## 🚀 Getting Started
+
+### Prerequisites
+
+1.  **Ollama**: [Download and Install Ollama](https://ollama.ai/)
+2.  **Model**: Run `ollama pull mistral`
+3.  **Node.js**: v18+ installed
+
+### Installation & Setup
 
 1.  **Clone the repository**.
-2.  **Install Dependencies**:
-
+2.  **Install Backend Dependencies**:
     ```bash
-    # Backend
     cd backend
     npm install
-
-    # Frontend
+    ```
+3.  **Configure Environment**:
+    Create a `.env` file in the `backend/` directory:
+    ```env
+    LLM_PROVIDER=ollama
+    LLM_MODE=local_only
+    OLLAMA_MODEL=mistral
+    OLLAMA_BASE_URL=http://localhost:11434
+    PORT=5000
+    ```
+4.  **Install Frontend Dependencies**:
+    ```bash
     cd ../frontend
     npm install
     ```
 
-3.  **Environment Variables**:
-    Create a `.env` file in the `backend/` directory:
+### Running the App
 
-    ```env
-    PORT=5000
-    GEMINI_API_KEY=your_gemini_api_key_here
-    GEMINI_MODEL=gemini-1.5-pro
-    ```
-
-4.  **Run the Application**:
-
-    Start the Backend:
+1.  **Start the Backend**:
     ```bash
     cd backend
     npm start
     ```
+    *The server will verify Ollama connectivity on startup.*
 
-    Start the Frontend:
+2.  **Start the Frontend**:
     ```bash
     cd frontend
     npm run dev
     ```
 
-## Usage
+## 🛡️ Privacy & Security
 
-1.  Open the frontend (usually `http://localhost:5173`).
-2.  You will see a Chat Interface.
-3.  **To Simplify a Note**: Click the "paperclip" icon to upload a photo of your discharge summary or a PDF.
-4.  **To Chat**: Type your questions in the text box. The AI will use the context of the uploaded file to answer you.
+This application is designed to be **Local-Only**. It does not send patient data to cloud providers like Google Gemini or OpenAI. All text processing and embeddings are performed on your local machine via Ollama.
 
-## Troubleshooting
-
--   **Upload Errors**: Ensure files are under 5MB. Supported formats: Images, PDF.
--   **Server Crash**: Check that `GEMINI_API_KEY` is set correctly.
+---
+**Disclaimer**: This is an AI-generated tool for informational purposes. Always consult with a healthcare professional for medical advice.

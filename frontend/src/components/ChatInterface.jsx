@@ -2,12 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, FileText, Image as ImageIcon, Loader2, Bot, User } from 'lucide-react';
 
 export default function ChatInterface() {
-    const [messages, setMessages] = useState([
-        {
-            role: 'assistant',
-            content: 'Hello! I can help you understand your discharge summary. You can upload a photo or PDF of your document, or just ask me questions.'
-        }
-    ]);
+    const [messages, setMessages] = useState(() => {
+        // Load messages from localStorage on initialization
+        const saved = localStorage.getItem('discharge_ai_chat');
+        return saved ? JSON.parse(saved) : [
+            {
+                role: 'assistant',
+                content: 'Hello! I can help you understand your discharge summary. You can upload a photo or PDF of your document, or just ask me questions.'
+            }
+        ];
+    });
+
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [attachedFile, setAttachedFile] = useState(null); // { name, type, file }
@@ -19,7 +24,22 @@ export default function ChatInterface() {
     // Auto-scroll to bottom of chat
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // Persist messages to localStorage whenever they change
+        localStorage.setItem('discharge_ai_chat', JSON.stringify(messages));
     }, [messages]);
+
+    const clearChat = () => {
+        if (window.confirm('Are you sure you want to clear the entire chat history?')) {
+            setMessages([
+                {
+                    role: 'assistant',
+                    content: 'Hello! I can help you understand your discharge summary. You can upload a photo or PDF of your document, or just ask me questions.'
+                }
+            ]);
+            localStorage.removeItem('discharge_ai_chat');
+        }
+    };
+
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
@@ -152,9 +172,24 @@ export default function ChatInterface() {
 
     return (
         <div className="flex flex-col h-[600px] w-full max-w-4xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+            {/* Header / Toolbar */}
+            <div className="bg-white border-b border-gray-100 p-3 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                    <Bot size={20} className="text-blue-600" />
+                    <span className="font-semibold text-gray-700 text-sm">Assistant Session</span>
+                </div>
+                <button
+                    onClick={clearChat}
+                    className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+                    title="Clear Chat History"
+                >
+                    Clear History
+                </button>
+            </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`flex max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start gap-2`}>
